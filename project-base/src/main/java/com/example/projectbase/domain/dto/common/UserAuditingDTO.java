@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Setter
 @Getter
-public abstract class UserAuditingDto {
+public abstract class UserAuditingDTO {
 
   private String createdBy;
 

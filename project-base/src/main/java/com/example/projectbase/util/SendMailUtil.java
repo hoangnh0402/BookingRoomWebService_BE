@@ -1,6 +1,6 @@
 package com.example.projectbase.util;
 
-import com.example.projectbase.domain.dto.common.DataMailDto;
+import com.example.projectbase.domain.dto.common.DataMailDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -28,7 +28,7 @@ public class SendMailUtil {
    * @param template Tên file html trong folder resources/template
    *                 Example: Index.html
    */
-  public void sendEmailWithHTML(DataMailDto mail, String template) throws Exception {
+  public void sendEmailWithHTML(DataMailDTO mail, String template) throws Exception {
     MimeMessage message = mailSender.createMimeMessage();
     MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
         StandardCharsets.UTF_8.name());
@@ -46,7 +46,7 @@ public class SendMailUtil {
    * @param mail Thông tin của mail cần gửi
    * @param files File cần gửi
    */
-  public void sendMailWithAttachment(DataMailDto mail, MultipartFile[] files) throws MessagingException {
+  public void sendMailWithAttachment(DataMailDTO mail, MultipartFile[] files) throws MessagingException {
     MimeMessage message = mailSender.createMimeMessage();
     MimeMessageHelper helper = new MimeMessageHelper(message, true, "utf-8");
     helper.setTo(mail.getTo());

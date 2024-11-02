@@ -2,8 +2,8 @@ package com.example.projectbase.security.jwt;
 
 import com.example.projectbase.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,33 +13,40 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
-@Slf4j
-@Component
 @RequiredArgsConstructor
+@Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-  private final CustomUserDetailsService customUserDetailsService;
+  private static final Logger LOGGER = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
   private final JwtTokenProvider tokenProvider;
 
-  @SneakyThrows
+  private final CustomUserDetailsService customUserDetailsService;
+
   @Override
-  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) {
+  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+          throws ServletException, IOException {
     try {
       String jwt = getJwtFromRequest(request);
+
       if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
-          String userId = tokenProvider.extractSubjectFromJwt(jwt);
-          UserDetails userDetails = customUserDetailsService.loadUserById(userId);
-          UsernamePasswordAuthenticationToken authenticationToken =
-              new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-          authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-          SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+        String userId = tokenProvider.extractUserIdFromJWT(jwt);
+
+        UserDetails userDetails = customUserDetailsService.loadUserById(userId);
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                userDetails, null, userDetails.getAuthorities());
+        authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
       }
+
     } catch (Exception ex) {
-      log.error("Could not set user authentication in security context", ex);
+      LOGGER.error("Could not set user authentication in security context", ex);
     }
     filterChain.doFilter(request, response);
   }
@@ -53,3 +60,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   }
 
 }
+
+
+

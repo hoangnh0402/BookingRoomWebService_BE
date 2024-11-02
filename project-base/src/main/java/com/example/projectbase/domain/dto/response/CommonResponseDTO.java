@@ -9,7 +9,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Setter
 @Getter
-public class CommonResponseDto {
+public class CommonResponseDTO {
 
   private Boolean status;
 

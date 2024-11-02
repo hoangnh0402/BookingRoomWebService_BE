@@ -1,6 +1,6 @@
 package com.example.projectbase.domain.dto.response;
 
-import com.example.projectbase.domain.dto.common.DateAuditingDto;
+import com.example.projectbase.domain.dto.common.DateAuditingDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,7 +10,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class UserDto extends DateAuditingDto {
+public class UserDto extends DateAuditingDTO {
 
   private String id;
 
