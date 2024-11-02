@@ -9,13 +9,13 @@ import java.util.List;
 
 @Setter
 @Getter
-public class PaginationResponseDto<T> {
+public class PaginationResponseDTO<T> {
 
   private PagingMeta meta;
 
   private List<T> items;
 
-  public PaginationResponseDto(PagingMeta meta, List<T> items) {
+  public PaginationResponseDTO(PagingMeta meta, List<T> items) {
     this.meta = meta;
 
     if (items == null) {

@@ -10,6 +10,8 @@ import java.util.*;
 
 public class UserPrincipal implements UserDetails {
 
+  private static final long serialVersionUID = 1L;
+
   private final String id;
 
   private final String firstName;
@@ -17,24 +19,30 @@ public class UserPrincipal implements UserDetails {
   private final String lastName;
 
   @JsonIgnore
-  private final String username;
+  private final String email;
+
+  @JsonIgnore
+  private final String phone;
 
   @JsonIgnore
   private String password;
 
+  private final boolean isEnabled;
+
+  private final boolean isLocked;
+
   private final Collection<? extends GrantedAuthority> authorities;
 
-  public UserPrincipal(String username, String password, Collection<? extends GrantedAuthority> authorities) {
-    this(null, null, null, username, password, authorities);
-  }
-
-  public UserPrincipal(String id, String firstName, String lastName, String username, String password,
-                       Collection<? extends GrantedAuthority> authorities) {
+  public UserPrincipal(String id, String firstName, String lastName, String email, String phone, String password,
+                       boolean isEnabled, boolean isLocked, Collection<? extends GrantedAuthority> authorities) {
     this.id = id;
     this.firstName = firstName;
     this.lastName = lastName;
-    this.username = username;
+    this.email = email;
+    this.phone = phone;
     this.password = password;
+    this.isEnabled = isEnabled;
+    this.isLocked = !isLocked;
 
     if (authorities == null) {
       this.authorities = null;
@@ -45,9 +53,9 @@ public class UserPrincipal implements UserDetails {
 
   public static UserPrincipal create(User user) {
     List<GrantedAuthority> authorities = new LinkedList<>();
-    authorities.add(new SimpleGrantedAuthority(user.getRole().getName()));
-    return new UserPrincipal(user.getId(), user.getFirstName(), user.getLastName(),
-        user.getUsername(), user.getPassword(), authorities);
+    authorities.add(new SimpleGrantedAuthority(user.getRole().getRoleName()));
+    return new UserPrincipal(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail(),
+            user.getPhoneNumber(), user.getPassword(), user.getIsEnable(), user.getIsLocked(), authorities);
   }
 
   public String getId() {
@@ -62,9 +70,13 @@ public class UserPrincipal implements UserDetails {
     return lastName;
   }
 
+  public String getPhone() {
+    return phone;
+  }
+
   @Override
   public String getUsername() {
-    return username;
+    return email;
   }
 
   @Override
@@ -84,7 +96,7 @@ public class UserPrincipal implements UserDetails {
 
   @Override
   public boolean isAccountNonLocked() {
-    return true;
+    return isLocked;
   }
 
   @Override
@@ -94,7 +106,7 @@ public class UserPrincipal implements UserDetails {
 
   @Override
   public boolean isEnabled() {
-    return true;
+    return isEnabled;
   }
 
   public boolean equals(Object object) {

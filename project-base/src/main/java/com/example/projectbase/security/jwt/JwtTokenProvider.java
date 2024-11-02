@@ -6,6 +6,8 @@ import com.example.projectbase.exception.InvalidException;
 import io.jsonwebtoken.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -21,74 +23,32 @@ import java.util.stream.Collectors;
 @Component
 public class JwtTokenProvider {
 
-  private final String CLAIM_TYPE = "type";
-  private final String TYPE_ACCESS = "access";
-  private final String TYPE_REFRESH = "refresh";
-  private final String USERNAME_KEY = "username";
-  private final String AUTHORITIES_KEY = "auth";
+  private static final Logger LOGGER = LoggerFactory.getLogger(JwtTokenProvider.class);
 
   @Value("${jwt.secret}")
   private String SECRET_KEY;
 
-  @Value("${jwt.access.expiration_time}")
-  private Integer EXPIRATION_TIME_ACCESS_TOKEN;
+  @Value("${jwt.time_expiration}")
+  private Integer EXPIRATION_TIME;
 
-  @Value("${jwt.refresh.expiration_time}")
-  private Integer EXPIRATION_TIME_REFRESH_TOKEN;
+  public String generateToken(Authentication authentication) {
+    UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
 
-  public String generateToken(UserPrincipal userPrincipal, Boolean isRefreshToken) {
-    String authorities = userPrincipal.getAuthorities().stream()
-        .map(GrantedAuthority::getAuthority)
-        .collect(Collectors.joining(","));
-    Map<String, Object> claim = new HashMap<>();
-    claim.put(CLAIM_TYPE, isRefreshToken ? TYPE_REFRESH : TYPE_ACCESS);
-    claim.put(USERNAME_KEY, userPrincipal.getUsername());
-    claim.put(AUTHORITIES_KEY, authorities);
-    if (isRefreshToken) {
-      return Jwts.builder()
-          .setClaims(claim)
-          .setIssuedAt(new Date(System.currentTimeMillis()))
-          .setExpiration(new Date(System.currentTimeMillis() + (EXPIRATION_TIME_REFRESH_TOKEN * 60 * 1000L)))
-          .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
-          .compact();
-    }
+    Calendar calendar = Calendar.getInstance();
+    calendar.setTimeInMillis(new Date().getTime());
+    calendar.add(Calendar.MINUTE, EXPIRATION_TIME);
+
     return Jwts.builder()
-        .setClaims(claim)
-        .setSubject(userPrincipal.getId())
-        .setIssuedAt(new Date(System.currentTimeMillis()))
-        .setExpiration(new Date(System.currentTimeMillis() + (EXPIRATION_TIME_ACCESS_TOKEN * 60 * 1000L)))
-        .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
-        .compact();
+            .setSubject(userPrincipal.getId())
+            .setIssuedAt(new Date(System.currentTimeMillis()))
+            .setExpiration(calendar.getTime())
+            .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+            .compact();
   }
 
-  public Authentication getAuthenticationByRefreshToken(String refreshToken) {
-    Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(refreshToken).getBody();
-    if (!claims.get(CLAIM_TYPE).equals(TYPE_REFRESH) || ObjectUtils.isEmpty(claims.get(AUTHORITIES_KEY))
-        || ObjectUtils.isEmpty(claims.get(USERNAME_KEY))) {
-      throw new InvalidException(ErrorMessage.Auth.INVALID_REFRESH_TOKEN);
-    }
-    Collection<? extends GrantedAuthority> authorities =
-        Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
-            .map(SimpleGrantedAuthority::new)
-            .collect(Collectors.toList());
-    UserDetails principal = new UserPrincipal(claims.get(USERNAME_KEY).toString(), "", authorities);
-    return new UsernamePasswordAuthenticationToken(principal, "", authorities);
-  }
-
-  public String extractClaimUsername(String token) {
-    return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody().get(USERNAME_KEY).toString();
-  }
-
-  public String extractSubjectFromJwt(String token) {
-    return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody().getSubject();
-  }
-
-  public Date extractExpirationFromJwt(String token) {
-    return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody().getExpiration();
-  }
-
-  public Boolean isTokenExpired(String token) {
-    return extractExpirationFromJwt(token).before(new Date());
+  public String extractUserIdFromJWT(String token) {
+    Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
+    return String.valueOf(claims.getSubject());
   }
 
   public boolean validateToken(String token) {
@@ -96,15 +56,15 @@ public class JwtTokenProvider {
       Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token);
       return true;
     } catch (SignatureException ex) {
-      log.error("Invalid JWT signature");
+      LOGGER.error("Invalid JWT signature");
     } catch (MalformedJwtException ex) {
-      log.error("Invalid JWT token");
+      LOGGER.error("Invalid JWT token");
     } catch (ExpiredJwtException ex) {
-      log.error("Expired JWT token");
+      LOGGER.error("Expired JWT token");
     } catch (UnsupportedJwtException ex) {
-      log.error("Unsupported JWT token");
+      LOGGER.error("Unsupported JWT token");
     } catch (IllegalArgumentException ex) {
-      log.error("JWT claims string is empty");
+      LOGGER.error("JWT claims string is empty");
     }
     return false;
   }

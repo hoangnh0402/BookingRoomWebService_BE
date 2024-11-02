@@ -2,8 +2,8 @@ package com.example.projectbase.util;
 
 import com.example.projectbase.constant.CommonConstant;
 import com.example.projectbase.constant.SortByDataConstant;
-import com.example.projectbase.domain.dto.pagination.PaginationRequestDto;
-import com.example.projectbase.domain.dto.pagination.PaginationSortRequestDto;
+import com.example.projectbase.domain.dto.pagination.PaginationRequestDTO;
+import com.example.projectbase.domain.dto.pagination.PaginationSortRequestDTO;
 import com.example.projectbase.domain.dto.pagination.PagingMeta;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -12,11 +12,11 @@ import org.springframework.data.domain.Sort;
 
 public class PaginationUtil {
 
-  public static Pageable buildPageable(PaginationRequestDto request) {
+  public static Pageable buildPageable(PaginationRequestDTO request) {
     return PageRequest.of(request.getPageNum(), request.getPageSize());
   }
 
-  public static Pageable buildPageable(PaginationSortRequestDto request, SortByDataConstant constant) {
+  public static Pageable buildPageable(PaginationSortRequestDTO request, SortByDataConstant constant) {
     Sort sort;
     if(request.getIsAscending()){
       sort = Sort.by(request.getSortBy(constant)).ascending();
@@ -26,7 +26,7 @@ public class PaginationUtil {
     return PageRequest.of(request.getPageNum(), request.getPageSize(), sort);
   }
 
-  public static <T> PagingMeta buildPagingMeta(PaginationRequestDto request, Page<T> pages) {
+  public static <T> PagingMeta buildPagingMeta(PaginationRequestDTO request, Page<T> pages) {
     return new PagingMeta(
         pages.getTotalElements(),
         pages.getTotalPages(),
@@ -37,7 +37,7 @@ public class PaginationUtil {
     );
   }
 
-  public static <T> PagingMeta buildPagingMeta(PaginationSortRequestDto request, SortByDataConstant constant, Page<T> pages) {
+  public static <T> PagingMeta buildPagingMeta(PaginationSortRequestDTO request, SortByDataConstant constant, Page<T> pages) {
     return new PagingMeta(
         pages.getTotalElements(),
         pages.getTotalPages(),

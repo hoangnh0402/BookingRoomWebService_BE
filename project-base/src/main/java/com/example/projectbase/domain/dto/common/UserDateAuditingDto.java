@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Setter
 @Getter
-public abstract class UserDateAuditingDto extends DateAuditingDto {
+public abstract class UserDateAuditingDto extends DateAuditingDTO {
 
   private String createdBy;
 

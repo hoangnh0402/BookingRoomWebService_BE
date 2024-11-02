@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreatedByDto {
+public class LastModifiedByDTO {
 
   private String id;
 

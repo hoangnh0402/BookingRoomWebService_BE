@@ -1,23 +1,21 @@
-package com.example.projectbase.domain.dto.request;
+package com.example.projectbase.domain.dto;
 
 import com.example.projectbase.constant.ErrorMessage;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import javax.validation.constraints.NotBlank;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-@Setter
-public class UserUpdateDto {
+public class LoginRequestDto {
 
   @NotBlank(message = ErrorMessage.NOT_BLANK_FIELD)
-  private String firstName;
+  private String emailOrPhone;
 
   @NotBlank(message = ErrorMessage.NOT_BLANK_FIELD)
-  private String lastName;
+  private String password;
 
 }

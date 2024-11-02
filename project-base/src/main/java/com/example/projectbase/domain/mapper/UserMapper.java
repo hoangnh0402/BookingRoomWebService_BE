@@ -1,8 +1,10 @@
 package com.example.projectbase.domain.mapper;
 
-
-import com.example.projectbase.domain.dto.request.UserCreateDto;
-import com.example.projectbase.domain.dto.response.UserDto;
+import com.example.projectbase.domain.dto.UserCreateDTO;
+import com.example.projectbase.domain.dto.UserDTO;
+import com.example.projectbase.domain.dto.UserSummaryDTO;
+import com.example.projectbase.domain.dto.UserUpdateDTO;
+import com.example.projectbase.domain.dto.common.LastModifiedByDTO;
 import com.example.projectbase.domain.entity.User;
 import org.mapstruct.*;
 
@@ -12,13 +14,22 @@ import java.util.List;
         nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
 public interface UserMapper {
 
-  User toUser(UserCreateDto userCreateDTO);
+  User toUser(UserCreateDTO userCreateDTO);
 
   @Mappings({
-      @Mapping(target = "roleName", source = "user.role.name"),
+          @Mapping(target = "roleName", source = "user.role.roleName"),
   })
-  UserDto toUserDto(User user);
+  UserDTO toUserDTO(User user);
 
-  List<UserDto> toUserDtos(List<User> user);
+  UserSummaryDTO toUserSummaryDTO(User user);
+
+  List<UserDTO> toUserDTOs(List<User> user);
+
+  @Mapping(target = "avatar", ignore = true)
+  void updateUserFromDTO(UserUpdateDTO updateDTO, @MappingTarget User user);
+
+  //CreatedByDTO toCreatedByDTO(User creator);
+
+  LastModifiedByDTO toLastModifiedByDTO(User updater);
 
 }

@@ -12,7 +12,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class PaginationSortRequestDto extends PaginationRequestDto {
+public class PaginationSortRequestDTO extends PaginationRequestDTO {
 
   @Parameter(description = "The name of property want to sort")
   private String sortBy = CommonConstant.EMPTY_STRING;

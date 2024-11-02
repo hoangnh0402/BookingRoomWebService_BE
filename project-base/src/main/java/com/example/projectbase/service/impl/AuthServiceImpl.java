@@ -1,13 +1,13 @@
 package com.example.projectbase.service.impl;
 
+import com.example.projectbase.constant.CommonConstant;
 import com.example.projectbase.constant.ErrorMessage;
-import com.example.projectbase.domain.dto.request.LoginRequestDto;
-import com.example.projectbase.domain.dto.request.TokenRefreshRequestDto;
-import com.example.projectbase.domain.dto.response.CommonResponseDto;
-import com.example.projectbase.domain.dto.response.LoginResponseDto;
+import com.example.projectbase.domain.dto.AuthenticationRequestDTO;
+import com.example.projectbase.domain.dto.AuthenticationResponseDTO;
+import com.example.projectbase.domain.dto.TokenRefreshRequestDto;
+import com.example.projectbase.domain.dto.response.CommonResponseDTO;
 import com.example.projectbase.domain.dto.response.TokenRefreshResponseDto;
 import com.example.projectbase.exception.UnauthorizedException;
-import com.example.projectbase.security.UserPrincipal;
 import com.example.projectbase.security.jwt.JwtTokenProvider;
 import com.example.projectbase.service.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -27,19 +27,19 @@ public class AuthServiceImpl implements AuthService {
   private final JwtTokenProvider jwtTokenProvider;
 
   @Override
-  public LoginResponseDto login(LoginRequestDto request) {
+  public AuthenticationResponseDTO login(AuthenticationRequestDTO request) {
     try {
       Authentication authentication = authenticationManager.authenticate(
-          new UsernamePasswordAuthenticationToken(request.getEmailOrPhone(), request.getPassword()));
+              new UsernamePasswordAuthenticationToken(request.getEmailOrPhone(), request.getPassword()));
       SecurityContextHolder.getContext().setAuthentication(authentication);
-      UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
-      String accessToken = jwtTokenProvider.generateToken(userPrincipal, Boolean.FALSE);
-      String refreshToken = jwtTokenProvider.generateToken(userPrincipal, Boolean.TRUE);
-      return new LoginResponseDto(accessToken, refreshToken, userPrincipal.getId(), authentication.getAuthorities());
-    } catch (InternalAuthenticationServiceException e) {
-      throw new UnauthorizedException(ErrorMessage.Auth.ERR_INCORRECT_USERNAME);
+      String jwt = jwtTokenProvider.generateToken(authentication);
+      return new AuthenticationResponseDTO(CommonConstant.BEARER_TOKEN, jwt, null, authentication.getAuthorities());
+    } catch (LockedException e) {
+      throw new UnauthorizedException(ErrorMessage.Auth.ERR_ACCOUNT_LOCKED);
+    } catch (DisabledException e) {
+      throw new UnauthorizedException(ErrorMessage.Auth.ERR_ACCOUNT_NOT_ENABLED);
     } catch (BadCredentialsException e) {
-      throw new UnauthorizedException(ErrorMessage.Auth.ERR_INCORRECT_PASSWORD);
+      throw new UnauthorizedException(ErrorMessage.Auth.ERR_INCORRECT_AUTHENTICATION);
     }
   }
 
@@ -49,7 +49,7 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
-  public CommonResponseDto logout(HttpServletRequest request) {
+  public CommonResponseDTO logout(HttpServletRequest request) {
     return null;
   }
 

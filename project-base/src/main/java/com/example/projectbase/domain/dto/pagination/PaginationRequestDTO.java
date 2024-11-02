@@ -11,7 +11,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class PaginationRequestDto {
+public class PaginationRequestDTO {
 
   @Parameter(description = "Page you want to retrieve (0..N)")
   private Integer pageNum = CommonConstant.ZERO_INT_VALUE;
