@@ -21,7 +21,7 @@ public class Role {
   private Long id;
 
   @Column(nullable = false)
-  private String name;
+  private String roleName;
 
   //Link to table User
   @OneToMany(cascade = CascadeType.ALL, mappedBy = "role")

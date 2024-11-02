@@ -1,6 +1,6 @@
 package com.example.projectbase;
 
-import com.example.projectbase.config.properties.AdminInfoProperties;
+import com.example.projectbase.config.UserInfoProperties;
 import com.example.projectbase.constant.RoleConstant;
 import com.example.projectbase.domain.entity.Role;
 import com.example.projectbase.domain.entity.User;
@@ -18,7 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Slf4j
 @RequiredArgsConstructor
-@EnableConfigurationProperties({AdminInfoProperties.class})
+@EnableConfigurationProperties({UserInfoProperties.class})
 @SpringBootApplication
 public class ProjectBaseApplication {
 
@@ -42,24 +42,4 @@ public class ProjectBaseApplication {
     log.info("-------------------------START SUCCESS " + appName
         + " Application------------------------------");
   }
-
-  @Bean
-  CommandLineRunner init(AdminInfoProperties userInfo) {
-    return args -> {
-      //init role
-      if (roleRepository.count() == 0) {
-        roleRepository.save(new Role(null, RoleConstant.ADMIN, null));
-        roleRepository.save(new Role(null, RoleConstant.USER, null));
-      }
-      //init admin
-      if (userRepository.count() == 0) {
-        User admin = User.builder().username(userInfo.getUsername())
-            .password(passwordEncoder.encode(userInfo.getPassword()))
-            .firstName(userInfo.getFirstName()).lastName(userInfo.getLastName())
-            .role(roleRepository.findByRoleName(RoleConstant.ADMIN)).build();
-        userRepository.save(admin);
-      }
-    };
-  }
-
 }
