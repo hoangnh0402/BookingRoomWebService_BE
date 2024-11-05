@@ -10,7 +10,7 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class TokenRefreshRequestDto {
+public class TokenRefreshRequestDTO {
 
   @NotBlank(message = ErrorMessage.NOT_BLANK_FIELD)
   private String refreshToken;
