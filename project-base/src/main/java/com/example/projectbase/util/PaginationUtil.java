@@ -12,40 +12,50 @@ import org.springframework.data.domain.Sort;
 
 public class PaginationUtil {
 
-  public static Pageable buildPageable(PaginationRequestDTO request) {
-    return PageRequest.of(request.getPageNum(), request.getPageSize());
-  }
+    private static final String CREATED_DATE = "created_date";
 
-  public static Pageable buildPageable(PaginationSortRequestDTO request, SortByDataConstant constant) {
-    Sort sort;
-    if(request.getIsAscending()){
-      sort = Sort.by(request.getSortBy(constant)).ascending();
-    } else {
-      sort = Sort.by(request.getSortBy(constant)).descending();
+    private static final String LAST_MODIFIED_DATE = "last_modified_date";
+
+    public static Pageable buildPageableSortCreatedDate(PaginationRequestDTO requestDTO) {
+        Sort sort = Sort.by(CREATED_DATE).descending();
+        return PageRequest.of(requestDTO.getPageNum(), requestDTO.getPageSize(), sort);
     }
-    return PageRequest.of(request.getPageNum(), request.getPageSize(), sort);
-  }
 
-  public static <T> PagingMeta buildPagingMeta(PaginationRequestDTO request, Page<T> pages) {
-    return new PagingMeta(
-        pages.getTotalElements(),
-        pages.getTotalPages(),
-        request.getPageNum() + CommonConstant.ONE_INT_VALUE,
-        request.getPageSize(),
-        CommonConstant.EMPTY_STRING,
-        CommonConstant.EMPTY_STRING
-    );
-  }
+    public static Pageable buildPageableSortLastModifiedDate(PaginationRequestDTO requestDTO) {
+        Sort sort = Sort.by(LAST_MODIFIED_DATE).descending();
+        return PageRequest.of(requestDTO.getPageNum(), requestDTO.getPageSize(), sort);
+    }
 
-  public static <T> PagingMeta buildPagingMeta(PaginationSortRequestDTO request, SortByDataConstant constant, Page<T> pages) {
-    return new PagingMeta(
-        pages.getTotalElements(),
-        pages.getTotalPages(),
-        request.getPageNum() + CommonConstant.ONE_INT_VALUE,
-        request.getPageSize(),
-        request.getSortBy(constant),
-        request.getIsAscending().equals(Boolean.TRUE) ? CommonConstant.SORT_TYPE_ASC : CommonConstant.SORT_TYPE_DESC
-    );
-  }
+    public static Pageable buildPageable(PaginationSortRequestDTO requestDTO, SortByDataConstant constant) {
+        Sort sort;
+        if(requestDTO.getSortType().equalsIgnoreCase(CommonConstant.SORT_TYPE_ASC)) {
+            sort = Sort.by(requestDTO.getSortBy(constant)).ascending();
+        } else {
+            sort = Sort.by(requestDTO.getSortBy(constant)).descending();
+        }
+        return PageRequest.of(requestDTO.getPageNum(), requestDTO.getPageSize(), sort);
+    }
+
+    public static <T> PagingMeta buildPagingMeta(PaginationRequestDTO requestDTO, Page<T> pages) {
+        return new PagingMeta(
+                pages.getTotalElements(),
+                pages.getTotalPages(),
+                requestDTO.getPageNum() + CommonConstant.ONE_INT_VALUE,
+                requestDTO.getPageSize(),
+                CREATED_DATE,
+                CommonConstant.SORT_TYPE_DESC
+        );
+    }
+
+    public static <T> PagingMeta buildPagingMeta(PaginationSortRequestDTO requestDTO, SortByDataConstant constant, Page<T> pages) {
+        return new PagingMeta(
+                pages.getTotalElements(),
+                pages.getTotalPages(),
+                requestDTO.getPageNum() + CommonConstant.ONE_INT_VALUE,
+                requestDTO.getPageSize(),
+                requestDTO.getSortBy(constant),
+                requestDTO.getSortType()
+        );
+    }
 
 }
