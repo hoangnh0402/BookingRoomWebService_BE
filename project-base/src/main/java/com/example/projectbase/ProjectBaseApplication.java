@@ -2,13 +2,20 @@ package com.example.projectbase;
 
 import com.example.projectbase.config.UserInfoProperties;
 import com.example.projectbase.constant.RoleConstant;
-import com.example.projectbase.domain.entity.Role;
-import com.example.projectbase.domain.entity.User;
+import com.example.projectbase.domain.dto.init.RoomInitJSON;
+import com.example.projectbase.domain.dto.init.ServiceInitJSON;
+import com.example.projectbase.domain.entity.*;
+import com.example.projectbase.domain.mapper.RoomMapper;
+import com.example.projectbase.domain.mapper.ServiceMapper;
 import com.example.projectbase.repository.RoleRepository;
+import com.example.projectbase.repository.RoomRepository;
+import com.example.projectbase.repository.ServiceRepository;
 import com.example.projectbase.repository.UserRepository;
 import com.example.projectbase.service.CustomUserDetailsService;
 import com.example.projectbase.util.FileUtil;
 import com.example.projectbase.util.UploadFileUtil;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -23,7 +30,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -35,9 +46,17 @@ public class ProjectBaseApplication {
 
   private final RoleRepository roleRepository;
 
+  private final RoomRepository roomRepository;
+
+  private final ServiceRepository serviceRepository;
+
   private final CustomUserDetailsService customUserDetailsService;
 
   private final UploadFileUtil uploadFile;
+
+  private final RoomMapper roomMapper;
+
+  private final ServiceMapper serviceMapper;
 
   public static void main(String[] args) {
     Environment env = SpringApplication.run(ProjectBaseApplication.class, args).getEnvironment();
@@ -47,11 +66,11 @@ public class ProjectBaseApplication {
     }
     String port = env.getProperty("server.port");
     log.info("-------------------------START " + appName
-        + " Application------------------------------");
+            + " Application------------------------------");
     log.info("   Application         : " + appName);
     log.info("   Url swagger-ui      : http://localhost:" + port + "/swagger-ui.html");
     log.info("-------------------------START SUCCESS " + appName
-        + " Application------------------------------");
+            + " Application------------------------------");
   }
 
   @Bean
@@ -72,11 +91,56 @@ public class ProjectBaseApplication {
         userRepository.save(admin);
       }
 
+      //Login
       User admin = userRepository.findByEmail(userInfo.getEmail()).get();
       UserDetails userDetails = customUserDetailsService.loadUserById(admin.getId());
       UsernamePasswordAuthenticationToken authentication =
               new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
       SecurityContextHolder.getContext().setAuthentication(authentication);
+
+      //init rooms
+      if(roomRepository.count() == 0) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        File file = new File("rooms.json");
+        try {
+          Map<String, List<RoomInitJSON>> roomsMap = objectMapper.readValue(file, new TypeReference<>() {});
+          for (Map.Entry<String, List<RoomInitJSON>> entry : roomsMap.entrySet()) {
+            for(RoomInitJSON roomInit : entry.getValue()) {
+              Room room = roomMapper.roomInitToRoom(roomInit);
+              for(Media media : room.getMedias()) {
+                String url = uploadFile.uploadImage(FileUtil.getBytesFileByPath(media.getUrl()));
+                media.setUrl(url);
+                media.setRoom(room);
+              }
+              roomRepository.save(room);
+            }
+          }
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
+
+      //init services & product
+      if(serviceRepository.count() == 0) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        File file = new File("services.json");
+        try {
+          List<ServiceInitJSON> services = objectMapper.readValue(file, new TypeReference<>() {});
+          for(ServiceInitJSON serviceInit : services) {
+            Service service = serviceMapper.serviceInitToService(serviceInit);
+            String urlThumbnailService = uploadFile.uploadImage(FileUtil.getBytesFileByPath(service.getThumbnail()));
+            service.setThumbnail(urlThumbnailService);
+            for(Product product : service.getProducts()) {
+              String urlThumbnailProduct = uploadFile.uploadImage(FileUtil.getBytesFileByPath(product.getThumbnail()));
+              product.setThumbnail(urlThumbnailProduct);
+              product.setService(service);
+            }
+            serviceRepository.save(service);
+          }
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
     };
   }
 }
