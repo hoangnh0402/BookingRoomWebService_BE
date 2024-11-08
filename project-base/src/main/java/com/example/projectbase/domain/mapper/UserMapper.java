@@ -7,6 +7,7 @@ import com.example.projectbase.domain.dto.UserUpdateDTO;
 import com.example.projectbase.domain.dto.common.CreatedByDTO;
 import com.example.projectbase.domain.dto.common.LastModifiedByDTO;
 import com.example.projectbase.domain.entity.User;
+import com.example.projectbase.projection.StatisticCustomerTopBookingProjection;
 import org.mapstruct.*;
 
 import java.util.List;
@@ -32,5 +33,7 @@ public interface UserMapper {
   CreatedByDTO toCreatedByDTO(User creator);
 
   LastModifiedByDTO toLastModifiedByDTO(User updater);
+
+  UserDTO statisticCustomerTopBookingProjectionToUserDTO(StatisticCustomerTopBookingProjection projection);
 
 }
