@@ -4,6 +4,7 @@ import com.example.projectbase.domain.dto.UserCreateDTO;
 import com.example.projectbase.domain.dto.UserDTO;
 import com.example.projectbase.domain.dto.UserSummaryDTO;
 import com.example.projectbase.domain.dto.UserUpdateDTO;
+import com.example.projectbase.domain.dto.common.CreatedByDTO;
 import com.example.projectbase.domain.dto.common.LastModifiedByDTO;
 import com.example.projectbase.domain.entity.User;
 import org.mapstruct.*;
@@ -28,7 +29,7 @@ public interface UserMapper {
   @Mapping(target = "avatar", ignore = true)
   void updateUserFromDTO(UserUpdateDTO updateDTO, @MappingTarget User user);
 
-  //CreatedByDTO toCreatedByDTO(User creator);
+  CreatedByDTO toCreatedByDTO(User creator);
 
   LastModifiedByDTO toLastModifiedByDTO(User updater);
 
