@@ -21,7 +21,7 @@ public interface ServiceRepository extends JpaRepository<com.example.projectbase
     Optional<com.example.projectbase.domain.entity.Service> findById(Long id);
 
     @Query("SELECT s FROM Service s WHERE s.id = ?1 AND s.deleteFlag = true")
-    Optional<Service> findByIdAndIsDeleteFlag(Long id);
+    Optional<com.example.projectbase.domain.entity.Service> findByIdAndIsDeleteFlag(Long id);
 
     @Query("SELECT s FROM Service s WHERE s.deleteFlag = false")
     List<Service> findAllForChatBot();
