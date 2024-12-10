@@ -8,14 +8,14 @@ services:
     ports:
       - "8080:8080"
     environment:
-      MYSQL_HOST: mysqldb
       MYSQL_USER: root
-      MYSQL_PASSWORD: 123456789
+      MYSQL_PASSWORD: admin123
       MYSQL_PORT: 3306
     depends_on:
       - mysqldb
     networks:
       - booking-hotel-network
+
   mysqldb:
     container_name: mysqldb
     image: mysql:8
@@ -25,13 +25,15 @@ services:
     volumes:
       - mysqldb:/var/lib/mysql
     environment:
-      - MYSQL_ROOT_PASSWORD = 123456789
-      - MYSQL_DATABASE = hotel
+      MYSQL_ROOT_PASSWORD: admin123
+      MYSQL_DATABASE: hotel
     networks:
       - booking-hotel-network
+
 volumes:
   mysqldb:
     driver: local
+
 networks:
   booking-hotel-network:
     driver: bridge

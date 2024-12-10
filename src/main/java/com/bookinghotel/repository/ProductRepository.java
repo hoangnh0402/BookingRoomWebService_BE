@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 
 @Repository
-public interface ProductRepository extends JpaRepository<Product, Long> {
+public interface  ProductRepository extends JpaRepository<Product, Long> {
 
   @Query("SELECT p FROM Product p WHERE p.id = ?1 AND p.deleteFlag = false")
   Optional<Product> findById(Long id);
